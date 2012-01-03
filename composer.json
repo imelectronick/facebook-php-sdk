@@ -1,7 +1,7 @@
 {
 	"name": "rokkan/facebook-php-sdk",
 	"type": "library",
-	"version": "3.1.1.3",
+	"version": "3.1.1.4",
 	"description": "Namespaced version of facebook's php-sdk",
 	"authors": [
 		{
