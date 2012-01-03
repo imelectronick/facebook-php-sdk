@@ -15,10 +15,10 @@
  * under the License.
  */
 
-require '../src/facebook.php';
+require '../src/Facebook/Facebook.php';
 
 // Create our Application instance (replace this with your appId and secret).
-$facebook = new Facebook(array(
+$facebook = new Facebook\Facebook(array(
   'appId'  => '191149314281714',
   'secret' => '73b67bf1c825fa47efae70a46c18906b',
 ));
@@ -36,7 +36,7 @@ if ($user) {
   try {
     // Proceed knowing you have a logged in user who's authenticated.
     $user_profile = $facebook->api('/me');
-  } catch (FacebookApiException $e) {
+  } catch (Facebook\FacebookApiException $e) {
     error_log($e);
     $user = null;
   }
