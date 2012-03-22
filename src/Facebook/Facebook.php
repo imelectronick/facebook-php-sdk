@@ -16,7 +16,7 @@
  */
 namespace Facebook;
 
-require_once "BaseFacebook.php";
+require_once "Facebook/BaseFacebook.php";
 
 /**
  * Extends the BaseFacebook class with the intent of using
