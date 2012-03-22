@@ -16,95 +16,13 @@
  */
 namespace Facebook;
 
+require_once "Facebook/ApiException.php";
+
 if (!function_exists('curl_init')) {
-  throw new Exception('Facebook needs the CURL PHP extension.');
+  throw new \Exception('Facebook needs the CURL PHP extension.');
 }
 if (!function_exists('json_decode')) {
-  throw new Exception('Facebook needs the JSON PHP extension.');
-}
-
-/**
- * Thrown when an API call returns an exception.
- *
- * @author Naitik Shah <naitik@facebook.com>
- */
-class FacebookApiException extends \Exception
-{
-  /**
-   * The result from the API server that represents the exception information.
-   */
-  protected $result;
-
-  /**
-   * Make a new API Exception with the given result.
-   *
-   * @param array $result The result from the API server
-   */
-  public function __construct($result) {
-    $this->result = $result;
-
-    $code = isset($result['error_code']) ? $result['error_code'] : 0;
-
-    if (isset($result['error_description'])) {
-      // OAuth 2.0 Draft 10 style
-      $msg = $result['error_description'];
-    } else if (isset($result['error']) && is_array($result['error'])) {
-      // OAuth 2.0 Draft 00 style
-      $msg = $result['error']['message'];
-    } else if (isset($result['error_msg'])) {
-      // Rest server style
-      $msg = $result['error_msg'];
-    } else {
-      $msg = 'Unknown Error. Check getResult()';
-    }
-
-    parent::__construct($msg, $code);
-  }
-
-  /**
-   * Return the associated result object returned by the API server.
-   *
-   * @return array The result from the API server
-   */
-  public function getResult() {
-    return $this->result;
-  }
-
-  /**
-   * Returns the associated type for the error. This will default to
-   * 'Exception' when a type is not available.
-   *
-   * @return string
-   */
-  public function getType() {
-    if (isset($this->result['error'])) {
-      $error = $this->result['error'];
-      if (is_string($error)) {
-        // OAuth 2.0 Draft 10 style
-        return $error;
-      } else if (is_array($error)) {
-        // OAuth 2.0 Draft 00 style
-        if (isset($error['type'])) {
-          return $error['type'];
-        }
-      }
-    }
-
-    return 'Exception';
-  }
-
-  /**
-   * To make debugging easier.
-   *
-   * @return string The string representation of the error
-   */
-  public function __toString() {
-    $str = $this->getType() . ': ';
-    if ($this->code != 0) {
-      $str .= $this->code . ': ';
-    }
-    return $str . $this->message;
-  }
+  throw new \Exception('Facebook needs the JSON PHP extension.');
 }
 
 /**
@@ -609,7 +527,7 @@ abstract class BaseFacebook
     try {
       $user_info = $this->api('/me');
       return $user_info['id'];
-    } catch (FacebookApiException $e) {
+    } catch (ApiException $e) {
       return 0;
     }
   }
@@ -668,7 +586,7 @@ abstract class BaseFacebook
                           'client_secret' => $this->getApiSecret(),
                           'redirect_uri' => $redirect_uri,
                           'code' => $code));
-    } catch (FacebookApiException $e) {
+    } catch (ApiException $e) {
       // most likely that user very recently revoked authorization.
       // In any event, we don't have an access token, so say so.
       return false;
@@ -693,7 +611,7 @@ abstract class BaseFacebook
    * @param array $params Method call object
    *
    * @return mixed The decoded response object
-   * @throws FacebookApiException
+   * @throws ApiException
    */
   protected function _restserver($params) {
     // generic application level parameters
@@ -726,7 +644,7 @@ abstract class BaseFacebook
    * @param array $params The query/post data
    *
    * @return mixed The decoded response object
-   * @throws FacebookApiException
+   * @throws ApiException
    */
   protected function _graph($path, $method = 'GET', $params = array()) {
     if (is_array($method) && empty($params)) {
@@ -755,7 +673,7 @@ abstract class BaseFacebook
    * @param array $params The query/post data
    *
    * @return string The decoded response object
-   * @throws FacebookApiException
+   * @throws ApiException
    */
   protected function _oauthRequest($url, $params) {
     if (!isset($params['access_token'])) {
@@ -818,7 +736,7 @@ abstract class BaseFacebook
     }
 
     if ($result === false) {
-      $e = new FacebookApiException(array(
+      $e = new ApiException(array(
         'error_code' => curl_errno($ch),
         'error' => array(
         'message' => curl_error($ch),
@@ -1037,7 +955,7 @@ abstract class BaseFacebook
    *                      by a failed API call.
    */
   protected function throwAPIException($result) {
-    $e = new FacebookApiException($result);
+    $e = new ApiException($result);
     switch ($e->getType()) {
       // OAuth 2.0 Draft 00 style
       case 'OAuthException':
